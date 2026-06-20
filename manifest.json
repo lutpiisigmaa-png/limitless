@@ -1,0 +1,20 @@
+{
+  "name": "Ideas to Reality",
+  "short_name": "Limitless",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#050505",
+  "icons": [
+    {
+      "src": "gojologo.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "gojologo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
