@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+ <title>Limitless</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
+
+        * {
+            margin: 0; padding: 0; box-sizing: border-box;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            height: 100vh; width: 100vw;
+            overflow: hidden; background: #000;
+        }
+
+        .app-container {
+            position: relative; width: 100vw; height: 100vh;
+        }
+
+        /* LAYER BAWAH: SURVIVAL / REALITY */
+        .layer-back {
+            position: absolute; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: linear-gradient(135deg, #050505 0%, #0a1128 100%);
+            color: #fff;
+        }
+
+        /* LAYER ATAS: COMMANDER / LIMITLESS */
+        .layer-front {
+            position: absolute; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: linear-gradient(135deg, #ffffff 0%, #e0e5ec 100%);
+            color: #111;
+            clip-path: inset(0 0 0 50%);
+            will-change: clip-path;
+        }
+
+        .content-wrapper {
+            position: absolute; top: 0; left: 0; width: 100vw; height: 100vh;
+            display: flex; padding: 40px 20px 100px 20px;
+        }
+
+        .side-left, .side-right {
+            width: 50vw; will-change: transform;
+        }
+        .side-left { padding-right: 20px; }
+        .side-right { padding-left: 20px; }
+
+       /* --- SLIDER TENGAH DIMUSNAHKAN GARISNYA --- */
+        .slider {
+            position: absolute; top: 0; bottom: 0; left: 50%;
+            width: 0px; 
+            z-index: 50; cursor: ew-resize;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        /* ICON GOJO FULL BODY (BEBAS DARI LINGKARAN) */
+        .custom-handle {
+            flex-shrink: 0; 
+            width: 85px; height: 85px; 
+            background-image: url('./gojo.png'); 
+            background-size: contain; 
+            background-repeat: no-repeat;
+            background-position: center;
+            background-color: transparent; 
+            border: none;
+            border-radius: 0; 
+            box-shadow: none; 
+            filter: drop-shadow(0 8px 10px rgba(0,0,0,0.6)); 
+            will-change: transform; 
+        }
+
+        /* --- STYLING UI --- */
+        h2 { font-size: 32px; font-weight: 800; letter-spacing: -1px; margin-bottom: 25px; display: flex; align-items: center; gap: 10px; }
+        .layer-back h2 { color: #fff; }
+        .layer-back h2::before { content: ''; width: 6px; height: 32px; background: #3b82f6; border-radius: 4px; }
+        .layer-front h2 { color: #111; }
+        .layer-front h2::before { content: ''; width: 6px; height: 32px; background: #111; border-radius: 4px; }
+
+        .input-box { width: 100%; padding: 16px; border-radius: 16px; font-size: 14px; outline: none; margin-bottom: 10px; transition: all 0.3s; }
+        .layer-back .input-box { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #fff; }
+        .layer-back .input-box:focus { border-color: #3b82f6; background: rgba(255,255,255,0.1); }
+        .layer-front .input-box { background: rgba(255,255,255,0.6); border: 1px solid rgba(0,0,0,0.1); color: #000; }
+        .layer-front .input-box:focus { border-color: #111; background: #fff; }
+
+        .btn-submit { width: 100%; padding: 14px; border-radius: 14px; font-weight: 800; text-transform: uppercase; border: none; cursor: pointer; margin-bottom: 25px; }
+        .layer-back .btn-submit { background: #3b82f6; color: #fff; }
+        .layer-front .btn-submit { background: #111; color: #fff; }
+
+        .task-list { list-style: none; }
+        .task-card { padding: 18px; border-radius: 16px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
+        .layer-back .task-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); }
+        .layer-front .task-card { background: rgba(255,255,255,0.5); border: 1px solid rgba(0,0,0,0.05); }
+        .task-text { font-size: 14px; font-weight: 600; line-height: 1.4; }
+        .task-date { font-size: 11px; opacity: 0.6; margin-top: 4px; display: block; }
+        
+        .btn-check { width: 28px; height: 28px; border-radius: 8px; border: 2px solid; background: transparent; cursor: pointer; flex-shrink: 0; margin-left: 10px;}
+        .layer-back .btn-check { border-color: rgba(255,255,255,0.3); }
+        .layer-front .btn-check { border-color: rgba(0,0,0,0.2); }
+
+        /* FLOATING DOCK */
+        .dock-container {
+            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+            display: flex; gap: 8px; padding: 10px; border-radius: 30px;
+            background: rgba(20, 20, 22, 0.65); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 100;
+        }
+        .dock-item {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            width: 65px; height: 50px; border-radius: 20px; background: transparent; border: none; color: #888;
+            font-size: 10px; font-weight: 800; cursor: pointer; transition: all 0.3s;
+        }
+        .dock-item svg { width: 22px; height: 22px; fill: currentColor; margin-bottom: 4px; }
+        .dock-item.active { color: #fff; background: rgba(255,255,255,0.1); }
+        .dock-item.active svg { transform: scale(1.1); fill: #3b82f6; }
+
+        /* OTHER VIEWS */
+        .view-board, .view-history {
+            position: absolute; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: #050505; color: #fff; padding: 40px 20px 100px 20px;
+            overflow-y: auto; display: none; z-index: 90;
+        }
+        .view-board h1, .view-history h1 { font-size: 32px; font-weight: 800; margin-bottom: 30px; }
+        
+        .board-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
+        .board-card { border-radius: 20px; padding: 20px; min-height: 150px; display: flex; flex-direction: column; justify-content: space-between; }
+        .board-tag { font-size: 10px; font-weight: 800; padding: 6px 10px; border-radius: 8px; text-transform: uppercase; width: max-content;}
+
+        /* WARNA KARTU BOARD & HISTORY (UDAH DI-FIX) */
+        .card-reality {
+            background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%);
+            border: 1px solid rgba(59, 130, 246, 0.4); box-shadow: 0 4px 10px rgba(0,0,0,0.3); color: #fff;
+        }
+        .card-reality .task-text { color: #fff; }
+        .card-reality .task-date { color: rgba(255,255,255,0.7); }
+        .card-reality .btn-check { border-color: rgba(255,255,255,0.4); }
+        .card-reality .board-tag { background: #3b82f6; color: #fff; }
+
+        .card-limitless {
+            background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%);
+            border: 1px solid rgba(0,0,0,0.1); box-shadow: 0 4px 10px rgba(0,0,0,0.05); color: #111;
+        }
+        .card-limitless .task-text { color: #111; }
+        .card-limitless .task-date { color: rgba(0,0,0,0.5); }
+        .card-limitless .btn-check { border-color: rgba(0,0,0,0.3); }
+        .card-limitless .board-tag { background: #111; color: #fff; }
+    </style>
+</head>
+<body>
+
+    <div class="app-container" id="view-main">
+        <div class="layer-back">
+            <div class="content-wrapper">
+                <div class="side-left" id="content-dark">
+                    <h2>Reality</h2>
+                    <input type="text" id="dark-input" class="input-box" placeholder="Urusan darurat?">
+                    <button class="btn-submit" onclick="addNote('dark')">Tambah</button>
+                    <ul class="task-list" id="dark-list"></ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="layer-front" id="layer-front">
+            <div class="content-wrapper">
+                <div class="side-left"></div>
+                <div class="side-right" id="content-light">
+                    <h2>Limitless</h2>
+                    <input type="text" id="light-input" class="input-box" placeholder="Ide brilian?">
+                    <button class="btn-submit" onclick="addNote('light')">Simpan</button>
+                    <ul class="task-list" id="light-list"></ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="slider" id="drag-slider">
+            <div class="custom-handle" id="gojo-icon"></div>
+        </div>
+    </div>
+
+    <div class="view-board" id="view-board">
+        <h1>Board</h1>
+        <div class="board-grid" id="board-grid"></div>
+    </div>
+    
+    <div class="view-history" id="view-history">
+        <h1>History</h1>
+        <ul class="task-list" id="history-list"></ul>
+    </div>
+
+    <div class="dock-container">
+        <button class="dock-item active" onclick="switchTab('main', this)">
+            <svg viewBox="0 0 24 24"><path d="M14 10H3v2h11v-2zm0-4H3v2h11V6zm4 8.29L16.29 13l-1.42 1.41L16.59 16l-1.72 1.71 1.42 1.41L18 17.41l1.71 1.71 1.41-1.41L19.41 16l1.71-1.71-1.41-1.41L18 14.29zM3 16h11v-2H3v2z"></path></svg>
+            Notes
+        </button>
+        <button class="dock-item" onclick="switchTab('board', this)">
+            <svg viewBox="0 0 24 24"><path d="M4 11h5V5H4v6zm0 7h5v-6H4v6zm6 0h5v-6h-5v6zm6 0h5v-6h-5v6zm-6-7h5V5h-5v6zm6-6v6h5V5h-5z"></path></svg>
+            Board
+        </button>
+        <button class="dock-item" onclick="switchTab('history', this)">
+            <svg viewBox="0 0 24 24"><path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"></path></svg>
+            History
+        </button>
+    </div>
+
+    <script>
+        let tasks = [];
+        try {
+            tasks = JSON.parse(localStorage.getItem('entj_v8_final')) || [];
+            if (!Array.isArray(tasks)) tasks = [];
+        } catch(e) {
+            tasks = [];
+        }
+
+        if (tasks.length === 0) {
+            tasks = [
+                { id: 1, type: 'dark', text: 'Ujian lusa! Review total.', date: '20 Jun 2026' },
+                { id: 2, type: 'light', text: 'Template web markaz baru.', date: '20 Jun 2026' }
+            ];
+        }
+
+        const slider = document.getElementById('drag-slider');
+        const layerFront = document.getElementById('layer-front');
+        const contentLight = document.getElementById('content-light');
+        const contentDark = document.getElementById('content-dark');
+        const gojoIcon = document.getElementById('gojo-icon');
+        const appContainer = document.querySelector('.app-container');
+        
+        let isDragging = false;
+        let currentPercent = 50;
+
+        const updateUI = (percent, activeDrag = false) => {
+            if(!slider || !layerFront) return;
+            slider.style.left = `${percent}%`;
+            layerFront.style.clipPath = `inset(0 0 0 ${percent}%)`;
+            
+            const offset = (percent - 50) / 2;
+            contentLight.style.transform = `translateX(${offset}vw)`;
+            contentDark.style.transform = `translateX(${offset}vw)`;
+
+            const scale = activeDrag ? 1.15 : 1;
+            const rotation = (percent - 50) * 4; 
+            gojoIcon.style.transform = `scale(${scale}) rotate(${rotation}deg)`;
+        };
+
+        const startDrag = () => { isDragging = true; updateUI(currentPercent, true); };
+        const stopDrag = () => { isDragging = false; updateUI(currentPercent, false); };
+        
+        const drag = (e) => {
+            if (!isDragging) return;
+            let clientX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
+            currentPercent = (clientX / appContainer.offsetWidth) * 100;
+            if (currentPercent < 0) currentPercent = 0; if (currentPercent > 100) currentPercent = 100;
+            updateUI(currentPercent, true);
+        };
+
+        if(slider) {
+            slider.addEventListener('mousedown', startDrag); document.addEventListener('mousemove', drag); document.addEventListener('mouseup', stopDrag);
+            slider.addEventListener('touchstart', startDrag, {passive: true}); document.addEventListener('touchmove', drag, {passive: true}); document.addEventListener('touchend', stopDrag);
+            updateUI(50, false);
+        }
+
+        function switchTab(viewId, btn) {
+            document.querySelectorAll('.dock-item').forEach(el => el.classList.remove('active'));
+            btn.classList.add('active');
+            ['main', 'board', 'history'].forEach(v => {
+                let el = document.getElementById(`view-${v}`);
+                if(el) el.style.display = 'none';
+            });
+            let target = document.getElementById(`view-${viewId}`);
+            if(target) target.style.display = 'block';
+        }
+
+        function addNote(type) {
+            const inputEl = document.getElementById(`${type}-input`);
+            if(!inputEl) return;
+            const text = inputEl.value.trim();
+            if (!text) return;
+            tasks.unshift({ id: Date.now(), type, text, date: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) });
+            inputEl.value = ''; 
+            localStorage.setItem('entj_v8_final', JSON.stringify(tasks)); 
+            renderData();
+        }
+
+        function checkTask(id) {
+            tasks = tasks.filter(t => t.id !== id); 
+            localStorage.setItem('entj_v8_final', JSON.stringify(tasks)); 
+            renderData();
+        }
+
+        function renderData() {
+            const darkList = document.getElementById('dark-list'); 
+            const lightList = document.getElementById('light-list');
+            const gridBoard = document.getElementById('board-grid'); 
+            const histList = document.getElementById('history-list');
+            
+            if(!darkList || !lightList || !gridBoard || !histList) return;
+
+            darkList.innerHTML = ''; lightList.innerHTML = ''; gridBoard.innerHTML = ''; histList.innerHTML = '';
+
+            tasks.forEach(task => {
+                const cardMain = `
+                    <li class="task-card">
+                        <div><span class="task-text">${task.text}</span><span class="task-date">${task.date}</span></div>
+                        <button class="btn-check" onclick="checkTask(${task.id})"></button>
+                    </li>`;
+                if (task.type === 'dark') darkList.innerHTML += cardMain;
+                if (task.type === 'light') lightList.innerHTML += cardMain;
+
+                // NAMA CLASS DAN TAG UDAH BENER SEMUA DI SINI
+                const themeClass = task.type === 'dark' ? 'card-reality' : 'card-limitless';
+                const tagText = task.type === 'dark' ? 'REALITY' : 'LIMITLESS';
+
+                histList.innerHTML += `
+                    <li class="task-card ${themeClass}">
+                        <div><span class="task-text">${task.text}</span><span class="task-date">${task.date}</span></div>
+                        <button class="btn-check" onclick="checkTask(${task.id})"></button>
+                    </li>`;
+
+                gridBoard.innerHTML += `
+                    <div class="board-card ${themeClass}">
+                        <p class="task-text" style="line-height: 1.5; margin-bottom: 15px;">${task.text}</p>
+                        <span class="board-tag">${tagText}</span>
+                    </div>`;
+            });
+        }
+        
+        renderData();
+    </script>
+</body>
+</html>
